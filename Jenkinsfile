@@ -60,11 +60,13 @@ pipeline {
 
             script {
                 def status = currentBuild.currentResult
-                def conclusion = status == 'SUCCESS' ? 'SUCCESS' : 'FAILURE'
+                def description = status == 'SUCCESS' ? 'Tests Passed' : 'Tests Failed'
+                def conclusion = status == 'SUCCESS' ? 'success' : 'failure'
                 
-                publishChecks(
+                githubChecks(
                     name: 'Test Results',
-                    conclusion: conclusion
+                    conclusion: conclusion,
+                    description: description
                 )
             }
         }
