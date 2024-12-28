@@ -44,10 +44,9 @@ pipeline {
 
         stage('Publish Test Results') {
             steps {
-                junit 'test-results.xml'  
+                junit 'test-results.xml'  // Đăng kết quả kiểm tra lên Jenkins
             }
-        } 
-
+        }
     }
 
     post {
@@ -70,7 +69,7 @@ pipeline {
                 def description = status == 'SUCCESS' ? 'Tests Passed' : 'Tests Failed'
                 def conclusion = status == 'SUCCESS' ? 'success' : 'failure'
                 
-                githubChecks(
+                publishChecks(
                     name: 'Test Results',
                     conclusion: conclusion,
                     description: description
