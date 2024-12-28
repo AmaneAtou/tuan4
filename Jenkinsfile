@@ -42,11 +42,13 @@ pipeline {
             }
         }
 
-stage('Publish Test Results') {
-    steps {
-        junit '**/test-results.xml'  
+        stage('Publish Test Results') {
+            steps {
+                junit '**/test-results.xml'  
+            }
+        } 
+
     }
-}
 
     post {
         always {
