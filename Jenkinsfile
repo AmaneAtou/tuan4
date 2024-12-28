@@ -9,7 +9,7 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 // Tải mã nguồn từ GitHub
-                git 'https://github.com/AmaneAtou/tuan4.git'  // Thay URL với repo của bạn
+                git 'https://github.com/AmaneAtou/tuan4.git'  
             }
         }
 
@@ -18,7 +18,8 @@ pipeline {
                 script {
                     // Tạo môi trường ảo và cài đặt dependencies
                     sh 'python3 -m venv $VIRTUAL_ENV'
-                    sh '$VIRTUAL_ENV/bin/pip install -r requirements.txt'  // Cài đặt các thư viện từ requirements.txt
+                    sh '$VIRTUAL_ENV/bin/pip install --upgrade pip'  
+                    sh '$VIRTUAL_ENV/bin/pip install -r requirements.txt'  
                 }
             }
         }
@@ -35,8 +36,8 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    // Chạy pytest để kiểm tra ứng dụng
-                    sh '$VIRTUAL_ENV/bin/pytest test_prime.py'
+                    // Chạy pytest để kiểm tra ứng dụng và tạo báo cáo XML
+                    sh '$VIRTUAL_ENV/bin/pytest --junitxml=test-results.xml test_prime.py'
                 }
             }
         }
@@ -44,7 +45,7 @@ pipeline {
         stage('Publish Test Results') {
             steps {
                 // Xuất kết quả kiểm tra dưới dạng JUnit
-                junit '**/test-*.xml'
+                junit '**/test-results.xml'  
             }
         }
     }
@@ -53,6 +54,7 @@ pipeline {
         always {
             echo 'Cleaning up...'
             // Dọn dẹp tài nguyên sau khi pipeline hoàn thành
+            sh 'kill $(lsof -t -i:8000)'  
         }
     }
 }
