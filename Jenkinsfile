@@ -17,7 +17,7 @@ pipeline {
             steps {
                 script {
                     // Tạo môi trường ảo và cài đặt dependencies
-                    sh 'python3 -m myenv $VIRTUAL_ENV'
+                    sh 'python3 -m venv $VIRTUAL_ENV'
                     sh '$VIRTUAL_ENV/bin/pip install -r requirements.txt'  // Cài đặt các thư viện từ requirements.txt
                 }
             }
