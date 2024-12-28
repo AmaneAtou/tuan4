@@ -42,13 +42,11 @@ pipeline {
             }
         }
 
-        stage('Publish Test Results') {
-            steps {
-                // Xuất kết quả kiểm tra dưới dạng JUnit
-                junit '**/test-results.xml'
-            }
-        }
+stage('Publish Test Results') {
+    steps {
+        junit '**/test-results.xml'  
     }
+}
 
     post {
         always {
