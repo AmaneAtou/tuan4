@@ -8,6 +8,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
+                // Tải mã nguồn từ GitHub
                 git 'https://github.com/AmaneAtou/tuan4.git'
             }
         }
@@ -15,6 +16,7 @@ pipeline {
         stage('Setup Virtual Environment') {
             steps {
                 script {
+                    // Tạo môi trường ảo và cài đặt dependencies
                     sh 'python3 -m venv $VIRTUAL_ENV'
                     sh '$VIRTUAL_ENV/bin/pip install --upgrade pip'
                     sh '$VIRTUAL_ENV/bin/pip install -r requirements.txt'
@@ -25,6 +27,7 @@ pipeline {
         stage('Run FastAPI') {
             steps {
                 script {
+                    // Chạy FastAPI ứng dụng trong nền
                     sh '$VIRTUAL_ENV/bin/uvicorn main:app --host 0.0.0.0 --port 8000 &'
                 }
             }
@@ -33,6 +36,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
+                    // Chạy pytest để kiểm tra ứng dụng và tạo báo cáo XML
                     sh '$VIRTUAL_ENV/bin/pytest --junitxml=test-results.xml test_prime.py'
                 }
             }
@@ -40,7 +44,8 @@ pipeline {
 
         stage('Publish Test Results') {
             steps {
-                junit 'test-results.xml'
+                // Xuất kết quả kiểm tra dưới dạng báo cáo JUnit
+                junit 'test-results.xml'  
             }
         }
     }
@@ -49,6 +54,7 @@ pipeline {
         always {
             echo 'Cleaning up...'
             script {
+                // Kiểm tra và dừng FastAPI nếu đang chạy
                 def pid = sh(script: "lsof -t -i:8000 || true", returnStdout: true).trim()
                 if (pid) {
                     echo "Killing process with PID: ${pid}"
@@ -58,12 +64,14 @@ pipeline {
                 }
             }
 
+            // Gửi kết quả kiểm tra lên GitHub Checks
             script {
                 def status = currentBuild.currentResult
                 def description = status == 'SUCCESS' ? 'Tests Passed' : 'Tests Failed'
-                def conclusion = status == 'SUCCESS' ? 'success' : 'failure'
-                
-                githubChecks(
+                def conclusion = status == 'SUCCESS' ? 'SUCCESS' : 'FAILURE'
+
+                // Sử dụng plugin GitHub Checks để gửi trạng thái kiểm tra lên GitHub
+                publishChecks(
                     name: 'Test Results',
                     conclusion: conclusion,
                     description: description
