@@ -2,28 +2,32 @@ pipeline {
     agent any
 
     environment {
-        PYTHON_ENV = '/usr/bin/python3'
+        VIRTUAL_ENV = 'myenv' // Tên thư mục môi trường ảo
     }
 
     stages {
-        stage('Checkout') {
+        stage('Clone Repository') {
             steps {
-                checkout scm
+                // Tải mã nguồn từ GitHub
+                git 'https://github.com/AmaneAtou/tuan4.git'  // Thay URL với repo của bạn
             }
         }
 
-        stage('Install dependencies') {
+        stage('Setup Virtual Environment') {
             steps {
                 script {
-                    sh 'pip install -r requirements.txt'
+                    // Tạo môi trường ảo và cài đặt dependencies
+                    sh 'python3 -m myenv $VIRTUAL_ENV'
+                    sh '$VIRTUAL_ENV/bin/pip install -r requirements.txt'  // Cài đặt các thư viện từ requirements.txt
                 }
             }
         }
 
-        stage('Run FastAPI Application') {
+        stage('Run FastAPI') {
             steps {
                 script {
-                    sh 'uvicorn main:app --reload &'
+                    // Chạy FastAPI ứng dụng trong nền
+                    sh '$VIRTUAL_ENV/bin/uvicorn main:app --host 0.0.0.0 --port 8000 &'
                 }
             }
         }
@@ -31,29 +35,24 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    sh 'pytest test_prime.py'
+                    // Chạy pytest để kiểm tra ứng dụng
+                    sh '$VIRTUAL_ENV/bin/pytest test_main.py'
                 }
             }
         }
 
-        stage('Report to GitHub') {
+        stage('Publish Test Results') {
             steps {
-                script {
-                    currentBuild.result = 'SUCCESS'
-                }
+                // Xuất kết quả kiểm tra dưới dạng JUnit
+                junit '**/test-*.xml'
             }
         }
     }
 
     post {
-        success {
-            echo 'Build and tests were successful!'
-        }
-        failure {
-            echo 'Build or tests failed.'
-        }
         always {
-            cleanWs()
+            echo 'Cleaning up...'
+            // Dọn dẹp tài nguyên sau khi pipeline hoàn thành
         }
     }
 }
