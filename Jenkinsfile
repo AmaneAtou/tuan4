@@ -2,14 +2,14 @@ pipeline {
     agent any
 
     environment {
-        VIRTUAL_ENV = 'myenv' // Tên thư mục môi trường ảo
+        VIRTUAL_ENV = 'myenv' 
     }
 
     stages {
         stage('Clone Repository') {
             steps {
                 // Tải mã nguồn từ GitHub
-                git 'https://github.com/AmaneAtou/tuan4.git'  
+                git 'https://github.com/AmaneAtou/tuan4.git'
             }
         }
 
@@ -18,8 +18,8 @@ pipeline {
                 script {
                     // Tạo môi trường ảo và cài đặt dependencies
                     sh 'python3 -m venv $VIRTUAL_ENV'
-                    sh '$VIRTUAL_ENV/bin/pip install --upgrade pip'  
-                    sh '$VIRTUAL_ENV/bin/pip install -r requirements.txt'  
+                    sh '$VIRTUAL_ENV/bin/pip install --upgrade pip'
+                    sh '$VIRTUAL_ENV/bin/pip install -r requirements.txt'
                 }
             }
         }
@@ -45,7 +45,7 @@ pipeline {
         stage('Publish Test Results') {
             steps {
                 // Xuất kết quả kiểm tra dưới dạng JUnit
-                junit '**/test-results.xml'  
+                junit '**/test-results.xml'
             }
         }
     }
@@ -53,8 +53,16 @@ pipeline {
     post {
         always {
             echo 'Cleaning up...'
-            // Dọn dẹp tài nguyên sau khi pipeline hoàn thành
-            sh 'kill $(lsof -t -i:8000)'  
+            script {
+                // Kiểm tra và dừng FastAPI nếu đang chạy
+                def pid = sh(script: "lsof -t -i:8000 || true", returnStdout: true).trim()
+                if (pid) {
+                    echo "Killing process with PID: ${pid}"
+                    sh "kill ${pid}"
+                } else {
+                    echo "No process running on port 8000"
+                }
+            }
         }
     }
 }
