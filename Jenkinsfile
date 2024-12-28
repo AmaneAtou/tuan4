@@ -66,13 +66,11 @@ pipeline {
             // Gửi kết quả kiểm tra lên GitHub Checks
             script {
                 def status = currentBuild.currentResult
-                def description = status == 'SUCCESS' ? 'Tests Passed' : 'Tests Failed'
-                def conclusion = status == 'SUCCESS' ? 'success' : 'failure'
+                def conclusion = status == 'SUCCESS' ? 'SUCCESS' : 'FAILURE'  // Dùng giá trị hợp lệ là 'SUCCESS' hoặc 'FAILURE'
                 
                 publishChecks(
                     name: 'Test Results',
-                    conclusion: conclusion,
-                    description: description
+                    conclusion: conclusion  // Loại bỏ tham số description
                 )
             }
         }
