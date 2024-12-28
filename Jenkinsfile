@@ -44,7 +44,7 @@ pipeline {
 
         stage('Publish Test Results') {
             steps {
-                junit '**/test-results.xml'  
+                junit 'test-results.xml'  
             }
         } 
 
@@ -62,6 +62,19 @@ pipeline {
                 } else {
                     echo "No process running on port 8000"
                 }
+            }
+
+            // Gửi kết quả kiểm tra lên GitHub Checks
+            script {
+                def status = currentBuild.currentResult
+                def description = status == 'SUCCESS' ? 'Tests Passed' : 'Tests Failed'
+                def conclusion = status == 'SUCCESS' ? 'success' : 'failure'
+                
+                githubChecks(
+                    name: 'Test Results',
+                    conclusion: conclusion,
+                    description: description
+                )
             }
         }
     }
