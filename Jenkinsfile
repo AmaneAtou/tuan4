@@ -36,7 +36,7 @@ pipeline {
             steps {
                 script {
                     // Chạy pytest để kiểm tra ứng dụng
-                    sh '$VIRTUAL_ENV/bin/pytest test_main.py'
+                    sh '$VIRTUAL_ENV/bin/pytest test_prime.py'
                 }
             }
         }
