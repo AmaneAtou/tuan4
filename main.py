@@ -1,17 +1,18 @@
 from fastapi import FastAPI
-from typing import Any
+from math import sqrt
 
 app = FastAPI()
 
-@app.get("/version")
-def get_version() -> Any:
+@app.get("/get_version")
+async def get_version():
     return {"version": "1.0.0"}
 
 @app.get("/check_prime/{number}")
-def check_prime(number: int) -> Any:
-    if number < 2:
-        return {"number": number, "is_prime": False}
-    for i in range(2, int(number ** 0.5) + 1):
+async def check_prime(number: int):
+    if number <= 1:
+        return {"is_prime": False}
+    for i in range(2, int(sqrt(number)) + 1):
         if number % i == 0:
-            return {"number": number, "is_prime": False}
-    return {"number": number, "is_prime": True}
+            return {"is_prime": False}
+    return {"is_prime": True}
+

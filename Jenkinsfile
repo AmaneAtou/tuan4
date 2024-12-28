@@ -1,39 +1,60 @@
 pipeline {
     agent any
-    
+
+    environment {
+        PYTHON_ENV = '/usr/bin/python3'
+    }
+
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-        
-        stage('Install Dependencies') {
+
+        stage('Install dependencies') {
             steps {
-                sh 'python -m pip install -r requirements.txt'
+                script {
+                    sh 'pip install -r requirements.txt'
+                }
             }
         }
-        
+
+        stage('Run FastAPI Application') {
+            steps {
+                script {
+                    sh 'uvicorn main:app --reload &'
+                }
+            }
+        }
+
         stage('Run Tests') {
             steps {
-                sh 'python -m pytest test_main.py -v'
+                script {
+                    sh 'pytest test_prime.py'
+                }
             }
         }
-        
-        stage('Run Application') {
+
+        stage('Report to GitHub') {
             steps {
-                sh 'python -m uvicorn main:app --reload'
+                script {
+                    currentBuild.result = 'SUCCESS'
+                }
             }
         }
     }
-    
+
     post {
+        success {
+            echo 'Build and tests were successful!'
+        }
+        failure {
+            echo 'Build or tests failed.'
+        }
         always {
-            githubCheck(
-                name: 'Jenkins Build',
-                conclusion: currentBuild.currentResult,
-                detailsURL: env.BUILD_URL
-            )
+            cleanWs()
         }
     }
 }
+
